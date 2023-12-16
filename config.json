@@ -1,0 +1,13 @@
+{
+    "defaultFilePath": "sensible/ks-chat.txt",
+    "projectName": "KS-ChatAnalyzer",
+
+    "formatDay-Month": false,
+    "hourDivisions": 96,
+
+    "outputDirPath": "output/",
+    "outputJsonFileName": "json_output.json",
+    "outputExcelFileName": "output.xlsx",
+
+    "logPath": "log.txt"
+}

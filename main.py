@@ -3,17 +3,18 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 
-filename="ks-chat.txt"
-projectName= "KS-Project DEV"
-formatDM=False
-#hourDivisions=96 #15min
-hourDivisions=1440
-outputDirPath = "output/"
-outputJsonFileName = "json_output.json"
-outputExcelFileName = "output.xlsx"
+with open("config.json", 'r') as f: config = json.load(f)
+filename = config["defaultFilePath"]
 
 months = ["","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
+def log(msg):
+    print(msg)
+    with open(config["outputDirPath"]+config["logPath"], "a", encoding="utf8") as f:
+        f.write(msg+"\n")
+
+open(config["outputDirPath"]+config["logPath"], "w").close()
+log("Program started")
 
 def browseFiles():
     global filename 
@@ -43,14 +44,14 @@ def readWAChatDates(fileName):
             date=dateAndTime[0].split("/")
             time=dateAndTime[1].split(":")
 
-            if formatDM:
+            if config["formatDay-Month"]:
                 fullDate = datetime.datetime(int("20"+ date[2]), int(date[1]), int(date[0]), int(time[0]), int(time[1]))
             else:
                 fullDate = datetime.datetime(int("20"+ date[2]), int(date[0]), int(date[1]), int(time[0]), int(time[1]))
             
             result.append(fullDate)
         except:
-            print("error reading line: "+line)
+            log("error reading line: "+line)
     return result
 
 #creates a json from a list of dates
@@ -61,8 +62,7 @@ def datesToJson(dates):
     prevDate = datetime.datetime(1950,1,1)
     result={
         "metadata": {
-            "name": projectName,
-            "version": "devMode",
+            "name": config["projectName"],
             "creation date": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         },
         "data": {}
@@ -106,7 +106,7 @@ def datesToJson(dates):
     return result
 
 def saveJson(list):
-    with open(outputDirPath+outputJsonFileName, "w") as fp:
+    with open(config["outputDirPath"]+config["outputJsonFileName"], "w") as fp:
         json.dump(list, fp, indent=2)
 
 def readJson():
@@ -115,7 +115,7 @@ def readJson():
     return list
 
 def writeJsonToXls(jsonFile):
-    workbook = xlsxwriter.Workbook(outputDirPath+outputExcelFileName)
+    workbook = xlsxwriter.Workbook(config["outputDirPath"]+config["outputExcelFileName"])
 
     row = 1
 
@@ -157,8 +157,8 @@ def writeJsonToXls(jsonFile):
 
     row = 2
     hour=datetime.datetime(2000,1,1,hour=0, minute=0)
-    for i in range(0,hourDivisions):
-        nextHour=hour+datetime.timedelta(hours=24/hourDivisions)
+    for i in range(0,config["hourDivisions"]):
+        nextHour=hour+datetime.timedelta(hours=24/config["hourDivisions"])
         hoursSheet.write(1, 3+i, hour.strftime("%H:%M")+"-"+nextHour.strftime("%H:%M"))
         hour=nextHour
     #years
@@ -169,14 +169,14 @@ def writeJsonToXls(jsonFile):
             hoursSheet.write(row, 2, month)
 
             hourResults=[]
-            for i in range(0,hourDivisions):
+            for i in range(0,config["hourDivisions"]):
                 hourResults.append(0)
 
             #days
             for day in jsonFile["data"][year][month]:
                 #each hour
                 for hour in jsonFile["data"][year][month][day][1]:
-                    hourResults[int((int(hour.split(":")[0])*60+int(hour.split(":")[1]))/(1440/hourDivisions))]+=1
+                    hourResults[int((int(hour.split(":")[0])*60+int(hour.split(":")[1]))/(1440/config["hourDivisions"]))]+=1
             
             col=3
             for i in hourResults:
@@ -184,15 +184,15 @@ def writeJsonToXls(jsonFile):
                 col+=1
             
             row+=1
-    for i in range(0,hourDivisions): 
+    for i in range(0,config["hourDivisions"]): 
         hoursSheet.write_formula(row, 3+i, "=SUM("+xlsxwriter.utility.xl_col_to_name(i+3)+"3:"+xlsxwriter.utility.xl_col_to_name(i+3)+str(row)+")")
 
 
     hoursChart = workbook.add_chart({'type': 'line'})
     hoursChart.add_series({
         'name': 'Hours Distribution',
-        'categories': '=hours!$D$2:$'+xlsxwriter.utility.xl_col_to_name(2+hourDivisions)+'$2',
-        'values': '=hours!$D$'+str(row+1)+':$'+xlsxwriter.utility.xl_col_to_name(2+hourDivisions)+'$'+str(row+1),
+        'categories': '=hours!$D$2:$'+xlsxwriter.utility.xl_col_to_name(2+config["hourDivisions"])+'$2',
+        'values': '=hours!$D$'+str(row+1)+':$'+xlsxwriter.utility.xl_col_to_name(2+config["hourDivisions"])+'$'+str(row+1),
         'trendline': {
             'type': 'moving_average',
             'period': 23,
