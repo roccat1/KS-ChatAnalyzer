@@ -1,6 +1,7 @@
 # KS-ChatAnalyzer
 This program analyzes a whatsapp chat and converts it to an excel with charts.
 
+[!NOTE]
 ## Read before using
 To use this program you have to check config.json, important configurations are:
 - formatDay-Month, set to true if your chat in in DD/MM/YY
