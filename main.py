@@ -13,8 +13,8 @@ def log(msg):
     with open(config["outputDirPath"]+config["logPath"], "a", encoding="utf8") as f:
         f.write(msg+"\n")
 
-open(config["outputDirPath"]+config["logPath"], "w").close()
-log("Program started")
+if not os.path.exists(config["outputDirPath"]): os.makedirs(config["outputDirPath"])
+with open(config["outputDirPath"]+config["logPath"], "w", encoding="utf8") as f: f.write("Program started\n")
 
 def browseFiles():
     global filename 
