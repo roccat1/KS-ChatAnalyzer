@@ -1,6 +1,9 @@
 # KS-ChatAnalyzer
 This program analyzes a whatsapp chat and converts it to an excel with charts.
 
+## Download
+Lastest version: https://github.com/roccat1/KS-ChatAnalyzer/releases/tag/v.1.0.1
+
 ## Read before using
 > [!NOTE]
 > To use this program you have to check config.json, important configurations are:
