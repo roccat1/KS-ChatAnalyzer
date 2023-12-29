@@ -2,12 +2,7 @@
 This program analyzes a whatsapp chat and converts it to an excel with charts.
 
 ## Download
-Lastest version: https://github.com/roccat1/KS-ChatAnalyzer/releases/tag/v.1.0.1
-
-## Read before using
-> [!NOTE]
-> To use this program you have to check config.json, important configurations are:
-> - formatDay-Month, set to true if your chat in in DD/MM/YY
+Lastest version: https://github.com/roccat1/KS-ChatAnalyzer/releases/tag/v.1.1
 
 ## Code Guide
 ### main.py

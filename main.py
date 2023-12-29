@@ -26,7 +26,7 @@ def browseFiles():
                                             "*.*")))
 	
 	# Change label contents
-    label_file_explorer.configure(text="File Opened: "+filename)
+    label_file_explorer.configure(text="File Opened: "+os.path.basename(filename))
 
 #creates a list of dates from a whatsapp chat
 def readWAChatDates(fileName):
@@ -44,7 +44,7 @@ def readWAChatDates(fileName):
             date=dateAndTime[0].split("/")
             time=dateAndTime[1].split(":")
 
-            if config["formatDay-Month"]:
+            if dd_mmFormat.get():
                 fullDate = datetime.datetime(int("20"+ date[2]), int(date[1]), int(date[0]), int(time[0]), int(time[1]))
             else:
                 fullDate = datetime.datetime(int("20"+ date[2]), int(date[0]), int(date[1]), int(time[0]), int(time[1]))
@@ -205,54 +205,71 @@ def writeJsonToXls(jsonFile):
     workbook.close()
 
 def runProgram():
-    datesRaw = readWAChatDates(filename)
-    print("25% done")
+    try:
+        datesRaw = readWAChatDates(filename)
+        print("25% done")
 
-    jsonResult = datesToJson(datesRaw)
-    print("50% done")
+        jsonResult = datesToJson(datesRaw)
+        print("50% done")
 
-    saveJson(jsonResult)
-    print("75% done")
+        saveJson(jsonResult)
+        print("75% done")
 
-    writeJsonToXls(jsonResult)
-    print("100% done")
+        writeJsonToXls(jsonResult)
+        print("100% done")
 
-    label_file_explorer.configure(text="Program executed")
-    subprocess.run([os.path.join(os.getenv('WINDIR'), 'explorer.exe'), os.getcwd()+"\\output"])
-
+        label_file_explorer.configure(text="Program executed")
+        subprocess.run([os.path.join(os.getenv('WINDIR'), 'explorer.exe'), os.getcwd()+"\\output"])
+    except:
+        label_file_explorer.configure(text="ERROR(is the format correct?/check log/terminal)")
 
 
 if __name__=='__main__':
     window = tk.Tk()
     window.title('KS Project')
     window.geometry("700x300")
-    window.config(background = "white")
+    window.config(background = "turquoise2")
 
     label_file_explorer = tk.Label(window, 
-							text = "Check config.json to make sure it runs correctly",
-							width = 100, height = 4, 
-							fg = "blue")
+							text = "KS-ChatAnalyzer",
+							width = 44, height = 2, 
+							fg = "black",
+                            background="pale green",
+                            font=("Arial", 20)
+        )
 
     button_explore = tk.Button(window, 
-						text = "Browse Files",
-						command = browseFiles) 
-    
+                        text = "Browse Files",
+                        command = browseFiles,
+                        width = 40, height = 2
+                        )
+
     button_run = tk.Button(window, 
 						text = "Run program",
-						command = runProgram) 
+						command = runProgram,
+                        width = 40, height = 2) 
     
     button_exit = tk.Button(window, 
 					text = "Exit",
-					command = exit) 
+					command = exit,
+                    width = 40, height = 2) 
 
-    label_file_explorer.grid(column = 1, row = 1)
+    label_file_explorer.grid(column = 1, row = 1, columnspan=2)
 
-    button_explore.grid(column = 1, row = 2)
+    button_explore.grid(column = 1, row = 2, columnspan=2)
 
-    button_run.grid(column = 1, row = 3)
+    button_run.grid(column = 1, row = 4, columnspan=2)
 
-    button_exit.grid(column = 1,row = 4)
+    button_exit.grid(column = 1,row = 5, columnspan=2)
 
+    dd_mmFormat = tk.BooleanVar(value=True)
+    DDMM_Button = tk.Radiobutton(window, text="DD_MM_YY Format", variable=dd_mmFormat,
+                                indicatoron=False, value=True, width=19, height = 2)
+    MMDD_Button = tk.Radiobutton(window, text="MM_DD_YY Format", variable=dd_mmFormat,
+                                indicatoron=False, value=False, width=19, height = 2)
+    
+    DDMM_Button.grid(column = 1,row = 3, sticky="e")
+    MMDD_Button.grid(column = 2,row = 3, sticky="w")
     # Let the window wait for any events
     window.mainloop()
 

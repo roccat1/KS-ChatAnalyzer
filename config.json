@@ -2,7 +2,6 @@
     "defaultFilePath": "sensible/ks-chat.txt",
     "projectName": "KS-ChatAnalyzer",
 
-    "formatDay-Month": false,
     "hourDivisions": 96,
 
     "outputDirPath": "output/",
