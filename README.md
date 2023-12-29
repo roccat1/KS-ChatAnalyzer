@@ -4,6 +4,9 @@ This program analyzes a whatsapp chat and converts it to an excel with charts.
 ## Download
 Lastest version: https://github.com/roccat1/KS-ChatAnalyzer/releases
 
+## How to use
+https://github.com/roccat1/KS-ChatAnalyzer/wiki/How-to-use
+
 ## Code Guide
 ### main.py
 #### browseFiles()
