@@ -384,7 +384,11 @@ def runProgram():
         log("successfully")
     except Exception as e:
         log("with an error :(")
-        label_file_explorer.configure(text="ERROR(is the format correct?/check log/terminal)")
+        if str(e)=="[Errno 13] Permission denied: 'output/output.xlsx'":
+            label_file_explorer.configure(text="Close output.xlsx before running the program again")
+            messagebox.showerror("Error!", "Close output.xlsx before running the program again")
+        else:
+            label_file_explorer.configure(text="ERROR(is the format correct?/check log/terminal)")
         log("ERROR: "+str(e))
 
 def configuration():
@@ -465,7 +469,7 @@ def configuration():
 if __name__=='__main__':
     window = tk.Tk()
     window.title('KS Project')
-    window.geometry("700x300")
+    window.geometry("700x310")
     window.config(background = "turquoise2")
     window.iconbitmap("assets/icon.ico")
 
@@ -516,6 +520,17 @@ if __name__=='__main__':
     
     DDMM_Button.grid(column = 1,row = 3, sticky="e")
     MMDD_Button.grid(column = 2,row = 3, sticky="w")
+    
+    #footer
+    footerLabel = tk.Label(window, 
+                            text = "Made by github.com/roccat1",
+                            width = 87, height = 2, 
+                            fg = "black",
+                            background="pale green",
+                            font=("Arial", 10)
+        )
+    footerLabel.grid(column = 1, row = 7, columnspan=2, sticky="w")
+    
     # Let the window wait for any events
     window.mainloop()
 
