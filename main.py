@@ -1,3 +1,7 @@
+##############################
+# Author: github.com/roccat1 #
+##############################
+
 import datetime, json, xlsxwriter, os, subprocess, webbrowser
 import tkinter as tk
 from tkinter import filedialog, messagebox
@@ -125,7 +129,28 @@ def readJson():
         list = json.load(f)
     return list
 
+def createChart(dataName, sheet, categories, values, chartsheetTitle, chartTitle, xAxisName):
+    global workbook
+    
+    chart = workbook.add_chart({'type': 'line'})
+    chart.add_series({
+        'name': dataName,
+        'categories': f'={sheet}!${categories[0]}${categories[1]}:${categories[2]}${categories[3]}',
+        'values': f'={sheet}!${values[0]}${values[1]}:${values[2]}${values[3]}',
+        'trendline': {
+            'type': 'moving_average',
+            'period': 23,
+        }
+    })
+    chart.set_x_axis({'date_axis': True})
+    chartSheet = workbook.add_chartsheet(chartsheetTitle)
+    chartSheet.set_chart(chart)
+    chart.set_title({'name': chartTitle})
+    chart.set_x_axis({'name': xAxisName})
+    
+
 def writeJsonToXls(jsonFile):
+    global workbook
     workbook = xlsxwriter.Workbook(config["outputDirPath"]+config["outputExcelFileName"])
 
     ############################################ COUNTS SHEET #########################################################
@@ -247,75 +272,16 @@ def writeJsonToXls(jsonFile):
     countsSheet.autofit()
     
     #total counts
-    dayCountsChart = workbook.add_chart({'type': 'line'})
-    dayCountsChart.add_series({
-        'name': 'Day Counts',
-        'categories': '=counts!$B$3:$B$'+str(rowDays),
-        'values': '=counts!$C$3:$C$'+str(rowDays),
-        'trendline': {
-            'type': 'moving_average',
-            'period': 23,
-        }
-    })
-    dayCountsChart.set_x_axis({'date_axis': True})
-    dayCountsChartSheet = workbook.add_chartsheet("Day Counts Chart")
-    dayCountsChartSheet.set_chart(dayCountsChart)
-    dayCountsChart.set_title({'name': 'Counts'})
-    dayCountsChart.set_x_axis({'name': 'Date'})
+    createChart("Day Counts", "counts", ["B", 3, "B", rowDays], ["C", 3, "C", rowDays], "Day Counts Chart", "Counts", "Date")
     
     #smoothed counts
-    smoothedCountsChart = workbook.add_chart({'type': 'line'})
-    smoothedCountsChart.add_series({
-        'name': 'Smoothed Counts',
-        'categories': '=counts!$M$6:$M$'+str(rowDays),
-        'values': '=counts!$N$6:$N$'+str(rowDays),
-        'trendline': {
-            'type': 'moving_average',
-            'period': 23,
-        }
-    })
-    smoothedCountsChart.set_x_axis({'date_axis': True})
-    smoothedCountsChartSheet = workbook.add_chartsheet("Smoothed Counts Chart")
-    smoothedCountsChartSheet.set_chart(smoothedCountsChart)
-    smoothedCountsChart.set_title({'name': 'Smoothed Counts'})
-    smoothedCountsChart.set_x_axis({'name': 'Date'})
+    createChart("Smoothed Counts", "counts", ["M", 6, "M", rowDays], ["N", 6, "N", rowDays], "Smoothed Counts Chart", "Smoothed Counts", "Date")
     
     #month averages
-    monthCountsChart = workbook.add_chart({'type': 'line'})
-    monthCountsChart.add_series({
-        'name': 'Month Averages',
-        'categories': '=counts!$E$6:$E$'+str(rowMonths),
-        'values': '=counts!$G$6:$G$'+str(rowMonths),
-        'trendline': {
-            'type': 'moving_average',
-            'period': 23,
-        }
-    })
-    monthCountsChart.set_x_axis({'date_axis': True})
-    monthCountsChartSheet = workbook.add_chartsheet("Month Averages Chart")
-    monthCountsChartSheet.set_chart(monthCountsChart)
-    monthCountsChart.set_title({'name': 'Month Average Counts'})
-    monthCountsChart.set_x_axis({'name': 'Month'})
+    createChart("Month Averages", "counts", ["E", 6, "E", rowMonths], ["G", 6, "G", rowMonths], "Month Averages Chart", "Month Average Counts", "Month")
     
     #year averages
-    yearCountsChart = workbook.add_chart({'type': 'line'})
-    yearCountsChart.add_series({
-        'name': 'Year Averages',
-        'categories': '=counts!$I$6:$I$'+str(rowYears),
-        'values': '=counts!$K$6:$K$'+str(rowYears),
-        'trendline': {
-            'type': 'moving_average',
-            'period': 23,
-        }
-    })
-    yearCountsChart.set_x_axis({'date_axis': True})
-    yearCountsChartSheet = workbook.add_chartsheet("Year Averages Chart")
-    yearCountsChartSheet.set_chart(yearCountsChart)
-    yearCountsChart.set_title({'name': 'Year Average counts'})
-    yearCountsChart.set_x_axis({'name': 'Year'})
-
-
-
+    createChart("Year Averages", "counts", ["I", 6, "I", rowYears], ["K", 6, "K", rowYears], "Year Averages Chart", "Year Average Counts", "Year")
 
     ############################################ HOURS SHEET #########################################################
     hoursSheet = workbook.add_worksheet("hours")
@@ -523,7 +489,7 @@ if __name__=='__main__':
     
     #footer
     footerLabel = tk.Label(window, 
-                            text = "Made by github.com/roccat1",
+                            text = "Author: github.com/roccat1",
                             width = 87, height = 2, 
                             fg = "black",
                             background="pale green",
