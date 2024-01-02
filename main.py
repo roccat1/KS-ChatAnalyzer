@@ -9,7 +9,8 @@ from tkinter import filedialog, messagebox
 config = {
     "projectName": "KS-ChatAnalyzer",
     "hourDivisions": 96,
-    "smoothingFactor": 3,
+    "smoothingFactorCounts": 3,
+    "smoothingFactorHours": 2,
 
     "dd_mmFormat": False,
     "defaultFilePath": "sensible/ks-chat.txt",
@@ -147,7 +148,6 @@ def createChart(dataName, sheet, categories, values, chartsheetTitle, chartTitle
     chartSheet.set_chart(chart)
     chart.set_title({'name': chartTitle})
     chart.set_x_axis({'name': xAxisName})
-    
 
 def writeJsonToXls(jsonFile):
     global workbook
@@ -163,12 +163,12 @@ def writeJsonToXls(jsonFile):
     
     countsThisYear=0
     
-    #cell foramat for upper part
+    #cell format for upper part
     cellFormatUp = workbook.add_format()
     cellFormatUp.set_border(1)
     cellFormatUp.set_bg_color('#C6C6C6')
     
-    #cell foramat for lower part
+    #cell format for lower part
     cellFormatDown = workbook.add_format()
     cellFormatDown.set_border(1)
     cellFormatDown.set_bg_color('#E1E1E1')
@@ -228,18 +228,18 @@ def writeJsonToXls(jsonFile):
     for year in jsonFile["data"]:
         for month in jsonFile["data"][year]:
             for day in jsonFile["data"][year][month]:
-                if countsLocation>=config["smoothingFactor"]:
+                if countsLocation>=config["smoothingFactorCounts"]:
                     #write date
                     countsSheet.write(rowDays, 12, f"{year}-{months.index(month):02}-{day:02}", cellFormatDown)
                     #write smoothed counts
-                    countsSheet.write(rowDays, 13, round(sum(counts[countsLocation-config["smoothingFactor"]:countsLocation+config["smoothingFactor"]+1])/(config["smoothingFactor"]*2+1), 2), cellFormatDown)
+                    countsSheet.write(rowDays, 13, round(sum(counts[countsLocation-config["smoothingFactorCounts"]:countsLocation+config["smoothingFactorCounts"]+1])/(config["smoothingFactorCounts"]*2+1), 2), cellFormatDown)
                     
                     rowDays+=1
                 countsLocation+=1
     
     
     countsSheet.write(1, 4, 'Total Average', cellFormatUp)
-    countsSheet.write(2, 4, round(sum(counts)/len(counts), 4), cellFormatDown)
+    countsSheet.write(2, 4, round(sum(counts)/len(counts), 2), cellFormatDown)
     
     countsSheet.write(1, 5, 'Total Sum', cellFormatUp)
     countsSheet.write(2, 5, sum(counts), cellFormatDown)
@@ -287,22 +287,25 @@ def writeJsonToXls(jsonFile):
     hoursSheet = workbook.add_worksheet("hours")
     hoursSheet.write(0, 0, 'Hours')
 
+    #upper row
     row = 2
     hour=datetime.datetime(2000,1,1,hour=0, minute=0)
     for i in range(0,config["hourDivisions"]):
         nextHour=hour+datetime.timedelta(hours=24/config["hourDivisions"])
-        hoursSheet.write(1, 3+i, hour.strftime("%H:%M")+"-"+nextHour.strftime("%H:%M"))
+        hoursSheet.write(1, 3+i, hour.strftime("%H:%M")+"-"+nextHour.strftime("%H:%M"), cellFormatUp)
         hour=nextHour
-    #years
+    
+    totalHourResults=[0]*config["hourDivisions"]
+    
+    #data per month
     for year in jsonFile["data"]:
-        hoursSheet.write(row, 1, year)
+        hoursSheet.write(row, 1, year, cellFormatDown)
         #months
         for month in jsonFile["data"][year]:
-            hoursSheet.write(row, 2, month)
+            hoursSheet.write(row, 2, month, cellFormatDown)
 
-            hourResults=[]
-            for i in range(0,config["hourDivisions"]):
-                hourResults.append(0)
+            #create list of 0s
+            hourResults=[0]*config["hourDivisions"]
 
             #days
             for day in jsonFile["data"][year][month]:
@@ -312,27 +315,52 @@ def writeJsonToXls(jsonFile):
             
             col=3
             for i in hourResults:
-                hoursSheet.write(row, col, i)
+                hoursSheet.write(row, col, i, cellFormatDown)
+                totalHourResults[col-3]+=i
                 col+=1
             
             row+=1
-    for i in range(0,config["hourDivisions"]): 
-        hoursSheet.write_formula(row, 3+i, "=SUM("+xlsxwriter.utility.xl_col_to_name(i+3)+"3:"+xlsxwriter.utility.xl_col_to_name(i+3)+str(row)+")")
+            
+    #total data
+    #upper row
+    row+=1
+    hour=datetime.datetime(2000,1,1,hour=0, minute=0)
+    for i in range(0,config["hourDivisions"]):
+        nextHour=hour+datetime.timedelta(hours=24/config["hourDivisions"])
+        hoursSheet.write(row, 3+i, hour.strftime("%H:%M")+"-"+nextHour.strftime("%H:%M"), cellFormatUp)
+        hour=nextHour
+    #data
+    col=3
+    row+=1
+    hoursSheet.write(row, 2, "Total", cellFormatDown)
+    for i in totalHourResults:
+        hoursSheet.write(row, col, i, cellFormatDown)
+        col+=1
+    
+    #smoothed data
+    #upper row
+    row+=2
+    hour=datetime.datetime(2000,1,1,hour=0, minute=0)
+    for i in range(0,config["hourDivisions"]):
+        nextHour=hour+datetime.timedelta(hours=24/config["hourDivisions"])
+        hoursSheet.write(row, 3+i, hour.strftime("%H:%M")+"-"+nextHour.strftime("%H:%M"), cellFormatUp)
+        hour=nextHour
+    #data
+    col=3
+    row+=1
+    hoursSheet.write(row, 2, "Smoothed", cellFormatDown)
+    for i in range(0,config["hourDivisions"]):
+        if i>=config["smoothingFactorHours"] and i<config["hourDivisions"]-config["smoothingFactorHours"]:
+            hoursSheet.write(row, col, round(sum(totalHourResults[i-config["smoothingFactorHours"]:i+config["smoothingFactorHours"]+1])/(config["smoothingFactorHours"]*2+1), 2), cellFormatDown)
+        else:
+            hoursSheet.write(row, col, 0, cellFormatDown)
+        col+=1
+    
+    hoursSheet.autofit()
 
+    createChart("Hours Distribution", "hours", ["D", 2, xlsxwriter.utility.xl_col_to_name(2+config["hourDivisions"]), 2], ["D", row-2, xlsxwriter.utility.xl_col_to_name(2+config["hourDivisions"]), row-2], "Hours Chart", "Hours Count", "Hours")
 
-    hoursChart = workbook.add_chart({'type': 'line'})
-    hoursChart.add_series({
-        'name': 'Hours Distribution',
-        'categories': '=hours!$D$2:$'+xlsxwriter.utility.xl_col_to_name(2+config["hourDivisions"])+'$2',
-        'values': '=hours!$D$'+str(row+1)+':$'+xlsxwriter.utility.xl_col_to_name(2+config["hourDivisions"])+'$'+str(row+1),
-        'trendline': {
-            'type': 'moving_average',
-            'period': 23,
-        }
-    })
-    hoursChartSheet = workbook.add_chartsheet("Hours Chart")
-    hoursChartSheet.set_chart(hoursChart)
-
+    createChart("Hours Distribution Smoothed", "hours", ["D", 2, xlsxwriter.utility.xl_col_to_name(2+config["hourDivisions"]), 2], ["D", row+1, xlsxwriter.utility.xl_col_to_name(2+config["hourDivisions"]), row+1], "Hours Chart Smoothed", "Hours Count Smoothed", "Hours")
     
     workbook.close()
 
@@ -368,7 +396,8 @@ def configuration():
     #option project name, hour divisions, smoothing factor, ouput dir path, output excel file name
     projectName = tk.StringVar(value=config["projectName"])
     hourDivisions = tk.IntVar(value=config["hourDivisions"])
-    smoothingFactor = tk.IntVar(value=config["smoothingFactor"])
+    smoothingFactorCounts = tk.IntVar(value=config["smoothingFactorCounts"])
+    smoothingFactorHours = tk.IntVar(value=config["smoothingFactorHours"])
     outputDirPath = tk.StringVar(value=config["outputDirPath"])
     outputExcelFileName = tk.StringVar(value=config["outputExcelFileName"])
     
@@ -384,49 +413,56 @@ def configuration():
     hourDivisionsLabel.grid(column = 1, row = 2, sticky="w")
     hourDivisionsEntry.grid(column = 2, row = 2, sticky="w")
     
-    #smoothing factor
-    smoothingFactorLabel = tk.Label(configWindow, text="Smoothing Factor", width=20, height = 2, fg="white", bg="black")
-    smoothingFactorEntry = tk.Entry(configWindow, textvariable=smoothingFactor, width=50, font=("Arial", 15), border=5)
+    #smoothing factor counts
+    smoothingFactorLabel = tk.Label(configWindow, text="Smoothing Factor Counts", width=20, height = 2, fg="white", bg="black")
+    smoothingFactorEntry = tk.Entry(configWindow, textvariable=smoothingFactorCounts, width=50, font=("Arial", 15), border=5)
     smoothingFactorLabel.grid(column = 1, row = 3, sticky="w")
     smoothingFactorEntry.grid(column = 2, row = 3, sticky="w")
+    
+    #smoothing factor hours
+    smoothingFactorLabel = tk.Label(configWindow, text="Smoothing Factor Hours", width=20, height = 2, fg="white", bg="black")
+    smoothingFactorEntry = tk.Entry(configWindow, textvariable=smoothingFactorHours, width=50, font=("Arial", 15), border=5)
+    smoothingFactorLabel.grid(column = 1, row = 4, sticky="w")
+    smoothingFactorEntry.grid(column = 2, row = 4, sticky="w")
     
     #output dir path
     outputDirPathLabel = tk.Label(configWindow, text="Output Dir Path", width=20, height = 2, fg="white", bg="black")
     outputDirPathEntry = tk.Entry(configWindow, textvariable=outputDirPath, width=50, font=("Arial", 15), border=5)
-    outputDirPathLabel.grid(column = 1, row = 4, sticky="w")
-    outputDirPathEntry.grid(column = 2, row = 4, sticky="w")
+    outputDirPathLabel.grid(column = 1, row = 5, sticky="w")
+    outputDirPathEntry.grid(column = 2, row = 5, sticky="w")
     
     #output excel file name
     outputExcelFileNameLabel = tk.Label(configWindow, text="Output Excel File Name", width=20, height = 2, fg="white", bg="black")
     outputExcelFileNameEntry = tk.Entry(configWindow, textvariable=outputExcelFileName, width=50, font=("Arial", 15), border=5)
-    outputExcelFileNameLabel.grid(column = 1, row = 5, sticky="w")
-    outputExcelFileNameEntry.grid(column = 2, row = 5, sticky="w")
+    outputExcelFileNameLabel.grid(column = 1, row = 6, sticky="w")
+    outputExcelFileNameEntry.grid(column = 2, row = 6, sticky="w")
     
     #save button
     def saveConfig():
         config["projectName"]=projectName.get()
         config["hourDivisions"]=hourDivisions.get()
-        config["smoothingFactor"]=smoothingFactor.get()
+        config["smoothingFactorCounts"]=smoothingFactorCounts.get()
+        config["smoothingFactorHours"]=smoothingFactorHours.get()
         config["outputDirPath"]=outputDirPath.get()
         config["outputExcelFileName"]=outputExcelFileName.get()
         configWindow.destroy()
         
     saveButton = tk.Button(configWindow, text="Save", command=saveConfig, width=20, height = 2)
-    saveButton.grid(column = 1, row = 6, columnspan=2)
+    saveButton.grid(column = 1, row = 7, columnspan=2)
     
     #cancel button
     def cancelConfig():
         configWindow.destroy()
     
     cancelButton = tk.Button(configWindow, text="Cancel", command=cancelConfig, width=20, height = 2)
-    cancelButton.grid(column = 1, row = 7, columnspan=2)
+    cancelButton.grid(column = 1, row = 8, columnspan=2)
     
     #wiki button
     def wiki():
         webbrowser.open('https://github.com/roccat1/KS-ChatAnalyzer/wiki')
     
     wikiButton = tk.Button(configWindow, text="Wiki", command=wiki, width=20, height = 2)
-    wikiButton.grid(column = 1, row = 8, columnspan=2)
+    wikiButton.grid(column = 1, row = 9, columnspan=2)
     
     #let the window wait for any events
     configWindow.mainloop()
@@ -516,17 +552,4 @@ ctr+ç #
 ctr+'¡
 
 xlsxwriter.utility.xl_col_to_name(27)
-'''
-
-'''
-def popup_bonus():
-    win = tk.Toplevel()
-    win.geometry("300x50")
-    win.wm_title("Popup")
-
-    l = tk.Entry(win, text="Input", width=50)
-    l.grid(row=0, column=1)
-
-    b = ttk.Button(win, text="Okay", command=win.destroy,width=50)
-    b.grid(row=1, column=1)
 '''
