@@ -24,6 +24,11 @@ filename = config["defaultFilePath"]
 
 months = ["","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
+def exit():
+    log("program closed")
+    window.destroy()
+    os._exit(0)
+
 def log(msg):
     print(msg)
     with open(config["outputDirPath"]+config["logPath"], "a", encoding="utf8") as f:
