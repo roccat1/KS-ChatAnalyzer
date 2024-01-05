@@ -6,47 +6,19 @@ import datetime, json, xlsxwriter, os, subprocess, webbrowser
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
-#roccat1apps folder
-path = os.path.join(os.getenv('APPDATA'), "Roccat1Apps")
-if not os.path.exists(path): os.makedirs(path)
+config = {
+    "projectName": "KS-ChatAnalyzer",
+    "hourDivisions": 96,
+    "smoothingFactorCounts": 3,
+    "smoothingFactorHours": 2,
 
-path = os.path.join(os.getenv('APPDATA'), "Roccat1Apps", "KSChatAnalyzer")
-if not os.path.exists(path): os.makedirs(path)
-
-path = os.path.join(os.getenv('APPDATA'), "Roccat1Apps", "KSChatAnalyzer", "Log")
-if not os.path.exists(path): os.makedirs(path)
-
-path = os.path.join(os.getenv('APPDATA'), "Roccat1Apps", "KSChatAnalyzer", "Config")
-if not os.path.exists(path): os.makedirs(path)
-
-#check if file exists log
-logPath = os.path.join(os.getenv('APPDATA'), "Roccat1Apps", "KSChatAnalyzer", "Log", "Log_"+datetime.datetime.now().strftime("%d-%m-%Y_%H-%M-%S")+".txt")
-if not os.path.exists(logPath):
-    with open(logPath, "w") as f:
-        f.write("Log file created at "+datetime.datetime.now().strftime("%d-%m-%Y_%H-%M-%S")+"\n")
-
-
-#check if file exists
-path = os.path.join(os.getenv('APPDATA'), "Roccat1Apps", "KSChatAnalyzer", "Config", "config.json")
-if not os.path.exists(path):
-    with open(path, "w") as f:
-        config = {
-                    "projectName": "KS-ChatAnalyzer",
-                    "hourDivisions": 96,
-                    "smoothingFactorCounts": 3,
-                    "smoothingFactorHours": 2,
-
-                    "dd_mmFormat": True,
-                    "defaultFilePath": "sensible/ks-chat.txt",
-                    "outputDirPath": "output/",
-                    "outputJsonFileName": "json_output.json",
-                    "outputExcelFileName": "output.xlsx"
-                }
-        json.dump(config, f, indent=2)
-else:
-    with open(path, "r") as f:
-        config = json.load(f)
-
+    "dd_mmFormat": False,
+    "defaultFilePath": "sensible/ks-chat.txt",
+    "logPath": "log.txt",
+    "outputDirPath": "output/",
+    "outputJsonFileName": "json_output.json",
+    "outputExcelFileName": "output.xlsx"
+}
 
 filename = config["defaultFilePath"]
 
@@ -58,10 +30,12 @@ def exit():
     os._exit(0)
 
 def log(msg):
-    global logPath
     print(msg)
-    with open(logPath, "a", encoding="utf8") as f:
+    with open(config["outputDirPath"]+config["logPath"], "a", encoding="utf8") as f:
         f.write(msg+"\n")
+
+if not os.path.exists(config["outputDirPath"]): os.makedirs(config["outputDirPath"])
+with open(config["outputDirPath"]+config["logPath"], "w", encoding="utf8") as f: f.write("Program started\n")
 
 def browseFiles():
     global filename 
@@ -470,8 +444,6 @@ def configuration():
     
     #save button
     def saveConfig():
-        global config
-
         config["projectName"]=projectName.get()
         config["hourDivisions"]=hourDivisions.get()
         config["smoothingFactorCounts"]=smoothingFactorCounts.get()
@@ -479,10 +451,6 @@ def configuration():
         config["outputDirPath"]=outputDirPath.get()
         config["outputExcelFileName"]=outputExcelFileName.get()
         configWindow.destroy()
-
-        path = os.path.join(os.getenv('APPDATA'), "Roccat1Apps", "KSChatAnalyzer", "Config", "config.json")
-        with open(path, "w") as f:
-            json.dump(config, f, indent=2)
         
     saveButton = tk.Button(configWindow, text="Save", command=saveConfig, width=20, height = 2)
     saveButton.grid(column = 1, row = 7, columnspan=2)
@@ -506,8 +474,6 @@ def configuration():
     
 
 if __name__=='__main__':
-    log("program started")
-
     window = tk.Tk()
     window.title('KS Project')
     window.geometry("700x310")
