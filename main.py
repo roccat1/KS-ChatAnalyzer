@@ -574,21 +574,3 @@ if __name__=='__main__':
     
     # Let the window wait for any events
     window.mainloop()
-
-'''
-git status
-
-git fetch  //comprovar
-git pull
-
-git add .
-git commit <-m msg>
-git push
-
-https://bluuweb.github.io/tutorial-github/
-
-ctr+ç #
-ctr+'¡
-
-xlsxwriter.utility.xl_col_to_name(27)
-'''
