@@ -419,7 +419,6 @@ if __name__=='__main__':
     window.title('KS Project')
     window.geometry("700x310")
     window.config(background = "turquoise2")
-    window.iconbitmap("assets/icon.ico")
 
     label_file_explorer = tk.Label(window, 
 							text = "KS-ChatAnalyzer",

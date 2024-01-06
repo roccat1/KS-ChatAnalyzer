@@ -32,7 +32,6 @@ def configuration(configPath, config):
     configWindow.title('Configuration')
     configWindow.geometry("700x400")
     configWindow.config(background = "turquoise2")
-    configWindow.iconbitmap("assets/icon.ico")
     
     #option project name, hour divisions, smoothing factor, ouput dir path, output excel file name
     projectName = tk.StringVar(value=config["projectName"])
