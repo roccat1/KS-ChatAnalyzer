@@ -2,27 +2,11 @@
 # Author: github.com/roccat1 #
 ##############################
 
-import datetime, json, xlsxwriter, os, subprocess, webbrowser
+import datetime, json, xlsxwriter, os, subprocess, appdirs
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
-config = {
-    "projectName": "KS-ChatAnalyzer",
-    "hourDivisions": 96,
-    "smoothingFactorCounts": 3,
-    "smoothingFactorHours": 2,
-
-    "dd_mmFormat": False,
-    "defaultFilePath": "sensible/ks-chat.txt",
-    "logPath": "log.txt",
-    "outputDirPath": "output/",
-    "outputJsonFileName": "json_output.json",
-    "outputExcelFileName": "output.xlsx"
-}
-
-filename = config["defaultFilePath"]
-
-months = ["","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+from configuration import *
 
 def exit():
     log("program closed")
@@ -30,12 +14,10 @@ def exit():
     os._exit(0)
 
 def log(msg):
+    global logPath
     print(msg)
-    with open(config["outputDirPath"]+config["logPath"], "a", encoding="utf8") as f:
-        f.write(msg+"\n")
-
-if not os.path.exists(config["outputDirPath"]): os.makedirs(config["outputDirPath"])
-with open(config["outputDirPath"]+config["logPath"], "w", encoding="utf8") as f: f.write("Program started\n")
+    with open(logPath, "a", encoding="utf8") as f:
+        f.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+" - "+msg+"\n")
 
 def browseFiles():
     global filename 
@@ -390,90 +372,39 @@ def runProgram():
             label_file_explorer.configure(text="ERROR(is the format correct?/check log/terminal)")
         log("ERROR: "+str(e))
 
-def configuration():
-    #open new window
-    configWindow = tk.Toplevel()
-    configWindow.title('Configuration')
-    configWindow.geometry("700x350")
-    configWindow.config(background = "turquoise2")
-    configWindow.iconbitmap("assets/icon.ico")
-    
-    #option project name, hour divisions, smoothing factor, ouput dir path, output excel file name
-    projectName = tk.StringVar(value=config["projectName"])
-    hourDivisions = tk.IntVar(value=config["hourDivisions"])
-    smoothingFactorCounts = tk.IntVar(value=config["smoothingFactorCounts"])
-    smoothingFactorHours = tk.IntVar(value=config["smoothingFactorHours"])
-    outputDirPath = tk.StringVar(value=config["outputDirPath"])
-    outputExcelFileName = tk.StringVar(value=config["outputExcelFileName"])
-    
-    #project name
-    projectNameLabel = tk.Label(configWindow, text="Project Name", width=20, height = 2, fg="white", bg="black")
-    projectNameEntry = tk.Entry(configWindow, textvariable=projectName, width=50, font=("Arial", 15), border=5)
-    projectNameLabel.grid(column = 1, row = 1, sticky="w")
-    projectNameEntry.grid(column = 2, row = 1, sticky="w")
-    
-    #hour divisions
-    hourDivisionsLabel = tk.Label(configWindow, text="Hour Divisions", width=20, height = 2, fg="white", bg="black")
-    hourDivisionsEntry = tk.Entry(configWindow, textvariable=hourDivisions, width=50, font=("Arial", 15), border=5)
-    hourDivisionsLabel.grid(column = 1, row = 2, sticky="w")
-    hourDivisionsEntry.grid(column = 2, row = 2, sticky="w")
-    
-    #smoothing factor counts
-    smoothingFactorLabel = tk.Label(configWindow, text="Smoothing Factor Counts", width=20, height = 2, fg="white", bg="black")
-    smoothingFactorEntry = tk.Entry(configWindow, textvariable=smoothingFactorCounts, width=50, font=("Arial", 15), border=5)
-    smoothingFactorLabel.grid(column = 1, row = 3, sticky="w")
-    smoothingFactorEntry.grid(column = 2, row = 3, sticky="w")
-    
-    #smoothing factor hours
-    smoothingFactorLabel = tk.Label(configWindow, text="Smoothing Factor Hours", width=20, height = 2, fg="white", bg="black")
-    smoothingFactorEntry = tk.Entry(configWindow, textvariable=smoothingFactorHours, width=50, font=("Arial", 15), border=5)
-    smoothingFactorLabel.grid(column = 1, row = 4, sticky="w")
-    smoothingFactorEntry.grid(column = 2, row = 4, sticky="w")
-    
-    #output dir path
-    outputDirPathLabel = tk.Label(configWindow, text="Output Dir Path", width=20, height = 2, fg="white", bg="black")
-    outputDirPathEntry = tk.Entry(configWindow, textvariable=outputDirPath, width=50, font=("Arial", 15), border=5)
-    outputDirPathLabel.grid(column = 1, row = 5, sticky="w")
-    outputDirPathEntry.grid(column = 2, row = 5, sticky="w")
-    
-    #output excel file name
-    outputExcelFileNameLabel = tk.Label(configWindow, text="Output Excel File Name", width=20, height = 2, fg="white", bg="black")
-    outputExcelFileNameEntry = tk.Entry(configWindow, textvariable=outputExcelFileName, width=50, font=("Arial", 15), border=5)
-    outputExcelFileNameLabel.grid(column = 1, row = 6, sticky="w")
-    outputExcelFileNameEntry.grid(column = 2, row = 6, sticky="w")
-    
-    #save button
-    def saveConfig():
-        config["projectName"]=projectName.get()
-        config["hourDivisions"]=hourDivisions.get()
-        config["smoothingFactorCounts"]=smoothingFactorCounts.get()
-        config["smoothingFactorHours"]=smoothingFactorHours.get()
-        config["outputDirPath"]=outputDirPath.get()
-        config["outputExcelFileName"]=outputExcelFileName.get()
-        configWindow.destroy()
-        
-    saveButton = tk.Button(configWindow, text="Save", command=saveConfig, width=20, height = 2)
-    saveButton.grid(column = 1, row = 7, columnspan=2)
-    
-    #cancel button
-    def cancelConfig():
-        configWindow.destroy()
-    
-    cancelButton = tk.Button(configWindow, text="Cancel", command=cancelConfig, width=20, height = 2)
-    cancelButton.grid(column = 1, row = 8, columnspan=2)
-    
-    #wiki button
-    def wiki():
-        webbrowser.open('https://github.com/roccat1/KS-ChatAnalyzer/wiki')
-    
-    wikiButton = tk.Button(configWindow, text="Wiki", command=wiki, width=20, height = 2)
-    wikiButton.grid(column = 1, row = 9, columnspan=2)
-    
-    #let the window wait for any events
-    configWindow.mainloop()
-    
+def openConfiguration():
+    global config
+    log("configuration menu opened")
+    config = configuration(configPath, config)
 
 if __name__=='__main__':
+    appName = "KS-ChatAnalyzer"
+    appAuthor = "roccat1"
+    
+    #create log
+    logPath = os.path.join(appdirs.user_log_dir(appName, appAuthor), datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".log")
+    if not os.path.exists(os.path.dirname(logPath)):
+        os.makedirs(os.path.dirname(logPath), exist_ok=True)
+        log("log.log created")
+    
+    #create/load config
+    configPath = os.path.join(appdirs.user_config_dir(appName, appAuthor), "config", "config.json")
+    if not os.path.exists(configPath):
+        os.makedirs(os.path.dirname(configPath), exist_ok=True)
+        saveConfig(configPath, defaultConfig)
+        config = defaultConfig
+        log("config.json created")
+    else:
+        config = readConfig(configPath)
+        log("config.json loaded")
+    
+    filename = config["defaultFilePath"]
+
+    months = ["","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+    if not os.path.exists(config["outputDirPath"]): os.makedirs(config["outputDirPath"])
+    
+    
     window = tk.Tk()
     window.title('KS Project')
     window.geometry("700x310")
@@ -501,7 +432,7 @@ if __name__=='__main__':
     
     button_config = tk.Button(window, 
 						text = "Configuration",
-						command = configuration,
+						command = openConfiguration,
                         width = 40, height = 2) 
     
     button_exit = tk.Button(window, 
@@ -540,21 +471,3 @@ if __name__=='__main__':
     
     # Let the window wait for any events
     window.mainloop()
-
-'''
-git status
-
-git fetch  //comprovar
-git pull
-
-git add .
-git commit <-m msg>
-git push
-
-https://bluuweb.github.io/tutorial-github/
-
-ctr+ç #
-ctr+'¡
-
-xlsxwriter.utility.xl_col_to_name(27)
-'''
