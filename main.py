@@ -356,6 +356,7 @@ def runProgram():
     try:
         datesRaw = readWAChatDates(filename)
         jsonResult = datesToJson(datesRaw)
+        if not os.path.exists(config["outputDirPath"]): os.makedirs(config["outputDirPath"])
         saveJson(jsonResult)
         writeJsonToXls(jsonResult)
 
@@ -371,6 +372,18 @@ def runProgram():
         else:
             label_file_explorer.configure(text="ERROR(is the format correct?/check log/terminal)")
         log("ERROR: "+str(e))
+
+def setDDMM():
+    global config
+    config["dd_mmFormat"]=True
+    saveConfig(configPath, config)
+    log("dd_mmFormat set to True")
+
+def setMMDD():
+    global config
+    config["dd_mmFormat"]=False
+    saveConfig(configPath, config)
+    log("dd_mmFormat set to False")
 
 def openConfiguration():
     global config
@@ -401,9 +414,6 @@ if __name__=='__main__':
     filename = config["defaultFilePath"]
 
     months = ["","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-
-    if not os.path.exists(config["outputDirPath"]): os.makedirs(config["outputDirPath"])
-    
     
     window = tk.Tk()
     window.title('KS Project')
@@ -452,9 +462,9 @@ if __name__=='__main__':
 
     dd_mmFormat = tk.BooleanVar(value=config["dd_mmFormat"])
     DDMM_Button = tk.Radiobutton(window, text="DD_MM_YY Format", variable=dd_mmFormat,
-                                indicatoron=False, value=True, width=19, height = 2)
+                                indicatoron=False, value=True, width=19, height = 2, command=setDDMM)
     MMDD_Button = tk.Radiobutton(window, text="MM_DD_YY Format", variable=dd_mmFormat,
-                                indicatoron=False, value=False, width=19, height = 2)
+                                indicatoron=False, value=False, width=19, height = 2, command=setMMDD)
     
     DDMM_Button.grid(column = 1,row = 3, sticky="e")
     MMDD_Button.grid(column = 2,row = 3, sticky="w")
