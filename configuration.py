@@ -8,7 +8,7 @@ defaultConfig = {
             "smoothingFactorCounts": 3,
             "smoothingFactorHours": 2,
 
-            "dd_mmFormat": False,
+            "dd_mmFormat": True,
             "defaultFilePath": "sensible/ks-chat.txt",
             "logPath": "log.txt",
             "outputDirPath": "output/",

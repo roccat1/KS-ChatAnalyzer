@@ -467,6 +467,9 @@ if __name__=='__main__':
                             background="pale green",
                             font=("Arial", 10)
         )
+    
+    footerLabel.bind("<Button-1>", lambda e:webbrowser.open_new_tab("https://github.com/roccat1"))
+    
     footerLabel.grid(column = 1, row = 7, columnspan=2, sticky="w")
     
     # Let the window wait for any events
