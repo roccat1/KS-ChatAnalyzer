@@ -1,4 +1,5 @@
-import scripts.gvar as gvar
+import scripts.xlsxUtilites.xlsxGvar as xlsxGvar
+
 
 def createChart(dataName: str, sheet: str, categories: list, values: list, chartsheetTitle: str, chartTitle: str, xAxisName: str) -> None:
     """Creates a chart in the excel file on the workbook
@@ -12,7 +13,7 @@ def createChart(dataName: str, sheet: str, categories: list, values: list, chart
         chartTitle (str): Title of the chart
         xAxisName (str): Name of the x axis
     """
-    chart = gvar.workbook.add_chart({'type': 'line'})
+    chart = xlsxGvar.workbook.add_chart({'type': 'line'})
     chart.add_series({
         'name': dataName,
         'categories': f'={sheet}!${categories[0]}${categories[1]}:${categories[2]}${categories[3]}',
@@ -23,7 +24,7 @@ def createChart(dataName: str, sheet: str, categories: list, values: list, chart
         }
     })
     chart.set_x_axis({'date_axis': True})
-    chartSheet = gvar.workbook.add_chartsheet(chartsheetTitle)
+    chartSheet = xlsxGvar.workbook.add_chartsheet(chartsheetTitle)
     chartSheet.set_chart(chart)
     chart.set_title({'name': chartTitle})
     chart.set_x_axis({'name': xAxisName})

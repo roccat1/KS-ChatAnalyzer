@@ -4,6 +4,9 @@ import webbrowser, json
 from scripts.utilities.log import log
 import scripts.gvar as gvar
 
+#config in use
+config = None
+
 #create default config
 defaultConfig = {
             "projectName": "KS-ChatAnalyzer",
@@ -40,6 +43,10 @@ def saveConfig(configPath: str, config: dict) -> None:
         configPath (str): path to the config file
         config (dict): config file as a dict
     """
+
+    if config["hourDivisions"]==69420 or config["smoothingFactorCounts"]==69420 or config["smoothingFactorHours"]==69420:
+        gvar.label_file_explorer.configure(text="You are a legend")
+
     with open(configPath, "w") as f:
         json.dump(config, f, indent=2)
 
@@ -53,12 +60,12 @@ def configurationMenu() -> None:
     configWindow.config(background = "turquoise2")
     
     #option project name, hour divisions, smoothing factor, ouput dir path, output excel file name
-    projectName = tk.StringVar(value=gvar.config["projectName"])
-    hourDivisions = tk.IntVar(value=gvar.config["hourDivisions"])
-    smoothingFactorCounts = tk.IntVar(value=gvar.config["smoothingFactorCounts"])
-    smoothingFactorHours = tk.IntVar(value=gvar.config["smoothingFactorHours"])
-    outputDirPath = tk.StringVar(value=gvar.config["outputDirPath"])
-    outputExcelFileName = tk.StringVar(value=gvar.config["outputExcelFileName"])
+    projectName = tk.StringVar(value=config["projectName"])
+    hourDivisions = tk.IntVar(value=config["hourDivisions"])
+    smoothingFactorCounts = tk.IntVar(value=config["smoothingFactorCounts"])
+    smoothingFactorHours = tk.IntVar(value=config["smoothingFactorHours"])
+    outputDirPath = tk.StringVar(value=config["outputDirPath"])
+    outputExcelFileName = tk.StringVar(value=config["outputExcelFileName"])
     
     #project name
     projectNameLabel = tk.Label(configWindow, text="Project Name", width=20, height = 2, fg="white", bg="black")
@@ -99,14 +106,14 @@ def configurationMenu() -> None:
     #save button
     def saveConfigButton() -> None:
         """saves the config file and closes the window"""
-        gvar.config["projectName"]=projectName.get()
-        gvar.config["hourDivisions"]=hourDivisions.get()
-        gvar.config["smoothingFactorCounts"]=smoothingFactorCounts.get()
-        gvar.config["smoothingFactorHours"]=smoothingFactorHours.get()
-        gvar.config["outputDirPath"]=outputDirPath.get()
-        gvar.config["outputExcelFileName"]=outputExcelFileName.get()
+        config["projectName"]=projectName.get()
+        config["hourDivisions"]=hourDivisions.get()
+        config["smoothingFactorCounts"]=smoothingFactorCounts.get()
+        config["smoothingFactorHours"]=smoothingFactorHours.get()
+        config["outputDirPath"]=outputDirPath.get()
+        config["outputExcelFileName"]=outputExcelFileName.get()
         
-        saveConfig(gvar.configPath, gvar.config)
+        saveConfig(gvar.configPath, config)
         
         configWindow.destroy()
         
@@ -116,7 +123,7 @@ def configurationMenu() -> None:
     #cancel button
     def cancelConfig() -> None:
         """closes the window without saving the config file"""
-        gvar.config = readConfig(gvar.configPath)
+        config = readConfig(gvar.configPath)
         configWindow.destroy()
     
     cancelButton = tk.Button(configWindow, text="Cancel", command=cancelConfig, width=20, height = 2)

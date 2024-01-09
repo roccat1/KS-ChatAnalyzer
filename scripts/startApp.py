@@ -22,14 +22,14 @@ def startApp() -> None:
     if not os.path.exists(gvar.configPath):
         os.makedirs(os.path.dirname(gvar.configPath), exist_ok=True)
         configuration.saveConfig(gvar.configPath, configuration.defaultConfig)
-        gvar.config = configuration.defaultConfig
+        configuration.config = configuration.defaultConfig
         log("config.json created")
     else:
-        gvar.config = configuration.readConfig(gvar.configPath)
+        configuration.config = configuration.readConfig(gvar.configPath)
         log("config.json loaded")
     
     #set default file path
-    gvar.filename = gvar.config["defaultFilePath"]
+    gvar.filename = configuration.config["defaultFilePath"]
 
     #run UI
     mainWindowUI.mainWindowUI()

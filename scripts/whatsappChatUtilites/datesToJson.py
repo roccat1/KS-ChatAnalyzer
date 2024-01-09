@@ -1,6 +1,7 @@
 import datetime
 
 import scripts.gvar as gvar
+import scripts.configuration.configuration as configuration
 
 def datesToJson(dates: list) -> dict:
     """Converts a list of dates to a dictionary with the format of the json result
@@ -17,7 +18,7 @@ def datesToJson(dates: list) -> dict:
     prevDate = datetime.datetime(1950,1,1)
     result={
         "metadata": {
-            "name": gvar.config["projectName"],
+            "name": configuration.config["projectName"],
             "creation date": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         },
         "data": {}

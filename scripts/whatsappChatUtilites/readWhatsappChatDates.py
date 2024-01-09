@@ -2,6 +2,7 @@ import datetime
 
 import scripts.gvar as gvar
 import scripts.utilities.log as log
+import scripts.configuration.configuration as configuration
 
 def readWAChatDates(fileName: str) -> list:
     """Reads a whatsapp chat and returns a list of dates
@@ -26,7 +27,7 @@ def readWAChatDates(fileName: str) -> list:
             date=dateAndTime[0].split("/")
             time=dateAndTime[1].split(":")
 
-            if gvar.config["dd_mmFormat"]:
+            if configuration.config["dd_mmFormat"]:
                 fullDate = datetime.datetime(int("20"+ date[2]), int(date[1]), int(date[0]), int(time[0]), int(time[1]))
             else:
                 fullDate = datetime.datetime(int("20"+ date[2]), int(date[0]), int(date[1]), int(time[0]), int(time[1]))

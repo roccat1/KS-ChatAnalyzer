@@ -4,9 +4,6 @@
 appName = "KS-ChatAnalyzer"
 appAuthor = "roccat1"
 
-# config dict with using preferences
-config = None
-
 # filename of the file to be analyzed
 filename = None
 
@@ -15,9 +12,6 @@ months = ["","January", "February", "March", "April", "May", "June", "July", "Au
 # paths
 logPath = None
 configPath = None
-
-# excel
-workbook = None
 
 # tkinter
 window = None

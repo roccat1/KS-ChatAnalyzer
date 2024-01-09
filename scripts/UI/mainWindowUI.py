@@ -54,7 +54,7 @@ def mainWindowUI() -> None:
 
     button_exit.grid(column = 1,row = 6, columnspan=2)
 
-    dd_mmFormat = tk.BooleanVar(value=gvar.config["dd_mmFormat"])
+    dd_mmFormat = tk.BooleanVar(value=configuration.config["dd_mmFormat"])
     DDMM_Button = tk.Radiobutton(gvar.window, text="DD_MM_YY Format", variable=dd_mmFormat,
                                 indicatoron=False, value=True, width=19, height = 2, command=DDMMFormat.setDDMM)
     MMDD_Button = tk.Radiobutton(gvar.window, text="MM_DD_YY Format", variable=dd_mmFormat,

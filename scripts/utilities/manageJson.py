@@ -1,6 +1,6 @@
 import json
 
-import scripts.gvar as gvar
+import scripts.configuration.configuration as configuration
 
 def saveJson(list: dict) -> None:
     """Saves a dictionary with json format to a json file
@@ -8,7 +8,7 @@ def saveJson(list: dict) -> None:
     Args:
         list (dict): Dictionary with json format
     """
-    with open(gvar.config["outputDirPath"]+gvar.config["outputJsonFileName"], "w") as fp:
+    with open(configuration.config["outputDirPath"]+configuration.config["outputJsonFileName"], "w") as fp:
         json.dump(list, fp, indent=2)
 
 def readJson() -> dict:
