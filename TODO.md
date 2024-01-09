@@ -1,0 +1,2 @@
+- improve smoothing charts algorithm
+- relocate gvar vars
