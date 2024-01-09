@@ -1,3 +1,6 @@
 /output
 /sensible
 /__pycache__
+/build
+/dist
+main.spec
