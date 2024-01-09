@@ -1,6 +1,11 @@
-##############################
-# Author: github.com/roccat1 #
-##############################
+################################
+# Author: github.com/roccat1   #
+# Contact: roc.r2005@gmail.com #
+################################
+
+__author__ = "roccat1"
+__version__ = "1.2.2"
+__email__ = "roc.r2005@gmail.com"
 
 import datetime, json, xlsxwriter, os, subprocess, appdirs
 import tkinter as tk
@@ -8,19 +13,31 @@ from tkinter import filedialog, messagebox
 
 from configuration import *
 
-def exit():
+def exit() -> None:
+    """Closes the program"""
     log("program closed")
     window.destroy()
+    print(f"Thank you for using {appName}!")
+    print(f"Log file: {logPath}")
     os._exit(0)
 
-def log(msg):
+def log(msg: str) -> None:
+    """Logs a message to the log file
+
+    Args:
+        msg (str): Message to log
+    """
     global logPath
+
     print(msg)
+
     with open(logPath, "a", encoding="utf8") as f:
         f.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+" - "+msg+"\n")
 
-def browseFiles():
-    global filename 
+def browseFiles() -> None:
+    """Opens a file explorer to select a file which path is saved in the global variable filename"""
+    global filename
+
     filename = filedialog.askopenfilename(initialdir = os.getcwd(),
                                             title = "Select a File",
                                             filetypes = (("Text files",
@@ -31,8 +48,15 @@ def browseFiles():
 	# Change label contents
     label_file_explorer.configure(text="File Opened: "+os.path.basename(filename))
 
-#creates a list of dates from a whatsapp chat
-def readWAChatDates(fileName):
+def readWAChatDates(fileName: str) -> list:
+    """Reads a whatsapp chat and returns a list of dates
+
+    Args:
+        fileName (str): Path to the file
+
+    Returns:
+        list: List of dates of the messages in the chat
+    """
     #llegir doc
     f = open(fileName, "r", encoding='UTF-8')
     chatRaw = f.readlines()
@@ -57,8 +81,15 @@ def readWAChatDates(fileName):
             log("error reading line: "+line)
     return result
 
-#creates a json from a list of dates
-def datesToJson(dates):
+def datesToJson(dates: list) -> dict:
+    """Converts a list of dates to a dictionary with the format of the json result
+
+    Args:
+        dates (list): List of dates
+
+    Returns:
+        dict: Dictionary with the format of the json result
+    """
     #create canvas for json result
     #primera data
     date = datetime.datetime(dates[0].year, dates[0].month, dates[0].day)
@@ -108,16 +139,37 @@ def datesToJson(dates):
 
     return result
 
-def saveJson(list):
+def saveJson(list: dict) -> None:
+    """Saves a dictionary with json format to a json file
+
+    Args:
+        list (dict): Dictionary with json format
+    """
     with open(config["outputDirPath"]+config["outputJsonFileName"], "w") as fp:
         json.dump(list, fp, indent=2)
 
-def readJson():
+def readJson() -> dict:
+    """Reads a json file and returns a dictionary with json format
+
+    Returns:
+        dict: Dictionary with json format
+    """
     with open("output/output.json", 'r') as f:
         list = json.load(f)
     return list
 
-def createChart(dataName, sheet, categories, values, chartsheetTitle, chartTitle, xAxisName):
+def createChart(dataName: str, sheet: str, categories: list, values: list, chartsheetTitle: str, chartTitle: str, xAxisName: str) -> None:
+    """Creates a chart in the excel file on the workbook
+
+    Args:
+        dataName (str): Name of the data to be displayed in the chart
+        sheet (str): Name of the sheet where the data is
+        categories (list): [startColumn, startRow, endColumn, endRow]
+        values (list): [startColumn, startRow, endColumn, endRow]
+        chartsheetTitle (str): Title of the chart sheet
+        chartTitle (str): Title of the chart
+        xAxisName (str): Name of the x axis
+    """
     global workbook
     
     chart = workbook.add_chart({'type': 'line'})
@@ -136,7 +188,12 @@ def createChart(dataName, sheet, categories, values, chartsheetTitle, chartTitle
     chart.set_title({'name': chartTitle})
     chart.set_x_axis({'name': xAxisName})
 
-def writeJsonToXls(jsonFile):
+def writeJsonToXls(jsonFile: dict) -> None:
+    """Writes the json file to an excel file processing all the data and creating charts and sheets with statistics
+
+    Args:
+        jsonFile (dict): Dictionary with json format to be written to the excel file
+    """
     global workbook
     workbook = xlsxwriter.Workbook(config["outputDirPath"]+config["outputExcelFileName"])
 
@@ -351,7 +408,8 @@ def writeJsonToXls(jsonFile):
     
     workbook.close()
 
-def runProgram():
+def runProgram() -> None:
+    """Runs the program with the selected file on the global variable filename"""
     log("program executed... ")
     try:
         datesRaw = readWAChatDates(filename)
@@ -369,23 +427,32 @@ def runProgram():
         if str(e)=="[Errno 13] Permission denied: 'output/output.xlsx'":
             label_file_explorer.configure(text="Close output.xlsx before running the program again")
             messagebox.showerror("Error!", "Close output.xlsx before running the program again")
+            log("ERROR: Close output.xlsx before running the program again")
+        elif str(e)==f"[Errno 2] No such file or directory: '{config['defaultFilePath']}'":
+            label_file_explorer.configure(text="ERROR: whatsapp chat file not found")
+            messagebox.showerror("Error!", "ERROR: whatsapp chat file not found")
+            log("ERROR: whatsapp chat file not found")
         else:
             label_file_explorer.configure(text="ERROR(is the format correct?/check log/terminal)")
         log("ERROR: "+str(e))
 
-def setDDMM():
+def setDDMM() -> None:
+    """Sets the dd_mmFormat to True in the config file"""
     global config
+
     config["dd_mmFormat"]=True
     saveConfig(configPath, config)
     log("dd_mmFormat set to True")
 
-def setMMDD():
+def setMMDD() -> None:
+    """Sets the dd_mmFormat to False in the config file"""
     global config
     config["dd_mmFormat"]=False
     saveConfig(configPath, config)
     log("dd_mmFormat set to False")
 
-def openConfiguration():
+def openConfiguration() -> None:
+    """Opens the configuration menu"""
     global config
     log("configuration menu opened")
     config = configuration(configPath, config)
