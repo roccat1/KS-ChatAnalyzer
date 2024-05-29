@@ -28,9 +28,9 @@ def readWAChatDates(fileName: str) -> list:
             time=dateAndTime[1].split(":")
 
             if configuration.config["dd_mmFormat"]:
-                fullDate = datetime.datetime(int("20"+ date[2]), int(date[1]), int(date[0]), int(time[0]), int(time[1]))
+                fullDate = datetime.datetime(int(date[2]), int(date[1]), int(date[0]), int(time[0]), int(time[1]))
             else:
-                fullDate = datetime.datetime(int("20"+ date[2]), int(date[0]), int(date[1]), int(time[0]), int(time[1]))
+                fullDate = datetime.datetime(int(date[2]), int(date[0]), int(date[1]), int(time[0]), int(time[1]))
             
             result.append(fullDate)
         except:
